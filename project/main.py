@@ -23,3 +23,4 @@ def login():
 @main.route('/logout')
 def logout():
     return render_template('logout.html')
+

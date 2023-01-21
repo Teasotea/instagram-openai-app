@@ -1,18 +1,18 @@
 from flask_login import login_user, login_required, logout_user
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, redirect, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3 as sql
 from .models import User
-from . import db
+import datetime
 
+from . import db
+from .utils.verification import send_verification_email
+from .utils.verification  import confirm_token
 
 auth = Blueprint("auth", __name__)
-
 
 @auth.route("/login")
 def login():
     return render_template("login.html")
-
 
 @auth.route("/login", methods=["POST"])
 def login_post():
@@ -21,23 +21,23 @@ def login_post():
         password = request.form["password"]
         remember = True if request.form.get("remember") else False
 
-        # with sql.connect("db.sqlite") as con:
         user = User.query.filter_by(email=email).first()
         print(f"{user = }")
+
         if not user or not check_password_hash(user.password, password):
             flash("Please check your login details and try again.")
             return redirect(url_for("auth.login"))
+
+        if not user.email_verified:
+            flash("Please verify your email and try again")
+            return redirect(url_for("auth.login"))
+
         login_user(user, remember=remember)
         return redirect(url_for('main.profile'))
 
+
     except Exception as e:
         raise e
-        # con.rollback()
-        msg = "error in insert operation"
-
-    # finally:#
-    #    return redirect(url_for('main.profile'))
-
 
 @auth.route("/signup")
 def signup():
@@ -46,12 +46,9 @@ def signup():
 
 @auth.route("/signup", methods=["POST"])
 def signup_post():
-    try:
         email = request.form["email"]
         name = request.form["name"]
         password = request.form["password"]
-
-        # with sql.connect("db.sqlite") as con:
 
         user = User.query.filter_by(email=email).first()
 
@@ -63,20 +60,31 @@ def signup_post():
             email=email,
             name=name,
             password=generate_password_hash(password, method="sha256"),
+            registered_on = datetime.datetime.now(),
+            email_verified = False,
         )
 
         db.session.add(new_user)
         db.session.commit()
-        # con.add(new_user)
-        # con.commit()
 
-    except Exception as e:
-        raise e
-        con.rollback()
-        msg = "error in insert operation"
+        send_verification_email(email)
 
-    finally:
         return redirect(url_for("auth.login"))
+
+@auth.route('/verify/<token>')
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+    user = User.query.filter_by(email=email).first_or_404()
+    if user.email_verified:
+        flash('Account already confirmed. Please login.', 'success')
+    else:
+        user.email_verified = True
+        db.session.commit()
+        flash('You have confirmed your account. Thanks!', 'success')
+    return redirect(url_for('auth.login'))
 
 
 @auth.route("/logout")

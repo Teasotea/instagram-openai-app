@@ -10,6 +10,19 @@ def create_app():
     app.config['SECRET_KEY'] = 'secret-key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
+    app.config['MAIL_SERVER']='smtp.mailtrap.io'
+    app.config['MAIL_PORT'] = 2525
+    app.config['MAIL_USERNAME'] = '73a980d257ac94'
+    app.config['MAIL_PASSWORD'] = 'c9175449a1a75e'
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+
+    '''app.config['MAIL_SERVER']='smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = 'your_email@gmail.com'
+    app.config['MAIL_PASSWORD'] = 'your_password'
+    app.config['MAIL_USE_TLS'] = False'''
+
     db.init_app(app)
 
     with app.app_context():
@@ -35,5 +48,3 @@ def create_app():
     app.register_blueprint(main_blueprint)
 
     return app
-    
-
