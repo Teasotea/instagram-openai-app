@@ -1,4 +1,4 @@
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 from flask import Blueprint, redirect, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
@@ -92,3 +92,19 @@ def confirm_email(token):
 def logout():
     logout_user()
     return redirect(url_for("main.index"))
+
+@auth.route("/profile", methods=["POST"])
+@login_required
+def add_info():
+    instagram_key = request.form["ig_key"]
+    print(instagram_key)
+
+    if current_user.instagram_key != None:
+         flash('You have added your Instagram API Key before.',  "warning")
+         return redirect(url_for("main.profile"))
+
+    current_user.instagram_key = instagram_key
+    db.session.commit()
+    flash('Instagram API Key is added. Thanks!', 'success')
+    
+    return redirect(url_for("main.profile"))
