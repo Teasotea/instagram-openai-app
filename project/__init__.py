@@ -2,6 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import os
+#from dotenv import load_dotenv
+#load_dotenv()
 
 db = SQLAlchemy()
 
@@ -17,8 +19,8 @@ def create_app():
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": 'noreply.test222@gmail.com',#os.environ['EMAIL_USER'],
-    "MAIL_PASSWORD": 'ibxgnthlisddcbty'#os.environ['EMAIL_PASSWORD']
+    "MAIL_USERNAME": os.environ.get('EMAIL_USER'),
+    "MAIL_PASSWORD": os.environ.get('EMAIL_PASSWORD')
     }   
 
     app.config.update(mail_settings)
