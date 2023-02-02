@@ -1,6 +1,11 @@
-from flask import Blueprint, render_template
+from pprint import pprint
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
+import sys
 from . import db
+from .ig_api.defines import getCreds
+from .ig_api.business_discovery import getAccountPosts
+from .chat import generateComment
 
 main = Blueprint('main', __name__)
 @main.route('/')
@@ -23,4 +28,47 @@ def login():
 @main.route('/logout')
 def logout():
     return render_template('logout.html')
+
+@main.route('/webhook', methods=['POST', 'GET'])
+def webhook():
+    print("Debug message here : 1", file=sys.stderr)
+
+    if request.method == 'POST':
+        print("POST", file=sys.stderr)
+        return 'success', 200
+    elif request.method == 'GET':
+        print("GET", file=sys.stderr)
+        # get IG account
+        ig_account = request.args.get('ig_account')
+
+        # take last post
+        post_id = 0
+        # if specific post requested
+        if request.args.get('post_id'):
+            # take specific post
+            post_id = int(request.args.get('post_id'))
+
+        params = getCreds()
+        params['ig_username'] = ig_account
+        response = getAccountPosts( params ) # hit the api for some data!
+        # pprint(response['json_data'])
+        # get specified post and its caption
+        caption = response['json_data']['business_discovery']['media']['data'][post_id]['caption']
+        caption_encode = caption.encode('ascii', 'ignore')
+        caption = caption_encode.decode()
+        comment = generateComment(params['ig_username'], caption)
+        '''
+        # For IG API webhook verification
+        challenge = request.args.get('hub.challenge')
+        if challenge == None:
+            return '',200
+        else:
+            return challenge
+        '''
+        return {'ig_username' : params['ig_username'], 
+                'post' : caption,
+                'reply': comment}
+    else:
+        print("Debug message here : 2", file=sys.stderr)
+        return '',200
 
