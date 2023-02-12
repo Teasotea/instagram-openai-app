@@ -65,9 +65,19 @@ def webhook():
         else:
             return challenge
         '''
+
+        '''
         return {'ig_username' : params['ig_username'], 
                 'post' : caption,
                 'reply': comment}
+        '''
+        messages = {'ig_username' : params['ig_username'], 
+                'post' : caption,
+                'reply': comment}
+
+
+        print(messages, file=sys.stderr)
+        return render_template('reply.html', messages=messages)
     else:
         print("Debug message here : 2", file=sys.stderr)
         return '',200

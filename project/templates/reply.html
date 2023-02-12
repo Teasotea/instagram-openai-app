@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{% block title %} Post from <b>{{messages['ig_username']}}</b>{% endblock %}</h1>
+    <div class='message'>
+        <p style='color: black;'>{{ messages['post'] }} </p>
+        <br>
+        <form method="post">
+
+        <textarea name="content"
+                  placeholder="Message content"
+                  rows="10"
+                  cols="60"
+                  >{{ messages['reply'] }}</textarea>
+        <br>
+        <button type="submit">Post</button>
+        </form>
+    </div>
+{% endblock %}
