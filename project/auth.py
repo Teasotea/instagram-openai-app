@@ -3,6 +3,7 @@ from flask import Blueprint, redirect, render_template, redirect, url_for, reque
 from werkzeug.security import generate_password_hash, check_password_hash
 from .models import User
 import datetime
+import sys
 
 from . import db
 from .utils.verification import send_verification_email
@@ -97,14 +98,35 @@ def logout():
 @login_required
 def add_info():
     instagram_key = request.form["ig_key"]
-    print(instagram_key)
+    instagram_username = request.form["ig_username"]
 
     if current_user.instagram_key != None:
          flash('You have added your Instagram API Key before.',  "warning")
          return redirect(url_for("main.profile"))
 
     current_user.instagram_key = instagram_key
+    current_user.instagram_username = instagram_username
     db.session.commit()
     flash('Instagram API Key is added. Thanks!', 'success')
     
     return redirect(url_for("main.profile"))
+
+@auth.route('/webhook', methods=['POST','GET'])
+def webhook():
+    print("Debug message here : 1", file=sys.stderr)
+
+    if request.method == 'POST':
+        print("POST", file=sys.stderr)
+        print(request.json, file=sys.stderr)
+        return 'success', 200
+    elif request.method == 'GET':
+        print(request.json, file=sys.stderr)
+        challenge = request.args.get('hub.challenge')
+        print(challenge, file=sys.stderr)
+        if challenge == None:
+            return '',200
+        else:
+            return challenge
+    else:
+        print("Debug message here : 2", file=sys.stderr)
+        return '',200

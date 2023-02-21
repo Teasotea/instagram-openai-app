@@ -10,3 +10,4 @@ class User(UserMixin, db.Model):
     email_verified = db.Column(db.Boolean, default=False)
     registered_on = db.Column(db.DateTime, nullable=False)
     instagram_key = db.Column(db.String(100), unique=True)
+    instagram_username = db.Column(db.String(100), unique=True)
