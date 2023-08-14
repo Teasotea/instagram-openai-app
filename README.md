@@ -1,4 +1,5 @@
 # instagram-app
+
 How to use:
 
 1. Clone this repo
@@ -7,7 +8,11 @@ How to use:
 4. Run Flask app
 
 ```
-#export KEYS and IDs
+pip install -r requirements.txt
+```
+
+```
+export KEYS and IDs
 export OPENAI_API='KEY FOR OPENAI API'
 export IG_ACCESS_TOKEN='IG ACCESS TOKEN'
 export IG_CLIENT_ID='INSTAGRAM APP CLIENT ID'
